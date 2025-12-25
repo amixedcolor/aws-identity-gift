@@ -4,40 +4,124 @@ import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedroc
 const client = new BedrockRuntimeClient({ region: 'us-east-1' });
 
 /**
+ * エラーメッセージの定義（日本語）
+ * 要件12.5: 日本語でユーザーフレンドリーなエラーメッセージを提供
+ */
+const ERROR_MESSAGES = {
+  NO_DATA: '診断結果データが必要です',
+  INVALID_DATA: '診断結果データが不正です',
+  THROTTLING: 'リクエストが多すぎます。しばらく待ってから再試行してください',
+  VALIDATION: '入力データが不正です',
+  SERVICE_UNAVAILABLE: '画像生成サービスが一時的に利用できません。しばらく待ってから再試行してください',
+  ACCESS_DENIED: '画像生成サービスへのアクセスが拒否されました',
+  CONTENT_FILTERED: '画像生成リクエストがコンテンツフィルターによりブロックされました',
+  GENERAL: 'ギフトカード生成中にエラーが発生しました',
+} as const;
+
+/**
+ * エラーをログ出力する
+ * 要件12.4: デバッグ目的でエラーをコンソールにログ出力
+ */
+function logError(context: string, error: unknown, additionalInfo?: Record<string, unknown>): void {
+  const timestamp = new Date().toISOString();
+  console.error(`[${timestamp}] [${context}]`, {
+    error: error instanceof Error ? {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    } : error,
+    ...additionalInfo,
+  });
+}
+
+/**
+ * Bedrockエラーからユーザー向けメッセージを取得
+ */
+function getBedrockErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'name' in error) {
+    const errorName = (error as { name: string }).name;
+    
+    switch (errorName) {
+      case 'ThrottlingException':
+        return ERROR_MESSAGES.THROTTLING;
+      case 'ValidationException':
+        return ERROR_MESSAGES.VALIDATION;
+      case 'ServiceUnavailableException':
+        return ERROR_MESSAGES.SERVICE_UNAVAILABLE;
+      case 'AccessDeniedException':
+        return ERROR_MESSAGES.ACCESS_DENIED;
+      default:
+        // エラーメッセージにcontent filterが含まれているかチェック
+        if ('message' in error && typeof (error as { message: string }).message === 'string') {
+          const message = (error as { message: string }).message.toLowerCase();
+          if (message.includes('content') && message.includes('filter')) {
+            return ERROR_MESSAGES.CONTENT_FILTERED;
+          }
+        }
+        return ERROR_MESSAGES.GENERAL;
+    }
+  }
+  return ERROR_MESSAGES.GENERAL;
+}
+
+/**
  * ギフトカード画像生成Function
  * 
  * 要件9.2, 9.3, 9.4, 9.5, 9.8に対応：
  * - Amazon Nova Canvasでビジュアル画像を生成
  * - Base64エンコードで返却
  * - サーバー側で画像を保存しない
+ * 
+ * 要件12.4, 12.5に対応：
+ * - エラーをコンソールにログ出力
+ * - 日本語でユーザーフレンドリーなエラーメッセージを提供
  */
 export const handler: Schema['giftCard']['functionHandler'] = async (event) => {
   const { resultData, userName } = event.arguments;
 
   // 入力検証
   if (!resultData) {
-    console.error('No result data provided');
+    logError('giftCard.handler', new Error('No result data provided'));
     return {
       imageData: null,
-      error: '診断結果データが必要です',
+      error: ERROR_MESSAGES.NO_DATA,
     };
   }
 
   try {
     // JSON文字列をパース
-    const result = JSON.parse(resultData);
-
-    if (!result.service || !result.service.serviceName || !result.catchphrase) {
-      console.error('Invalid result data:', result);
+    let result: { service?: { serviceName?: string; category?: string }; catchphrase?: string };
+    try {
+      result = JSON.parse(resultData);
+    } catch (parseError) {
+      logError('giftCard.handler.parseInput', parseError, { resultData });
       return {
         imageData: null,
-        error: '診断結果データが不正です',
+        error: ERROR_MESSAGES.INVALID_DATA,
+      };
+    }
+
+    if (!result.service || !result.service.serviceName || !result.catchphrase) {
+      logError('giftCard.handler', new Error('Invalid result data'), { 
+        hasService: !!result.service,
+        hasServiceName: !!result.service?.serviceName,
+        hasCatchphrase: !!result.catchphrase,
+      });
+      return {
+        imageData: null,
+        error: ERROR_MESSAGES.INVALID_DATA,
       };
     }
 
     // Amazon Nova Canvasで画像を生成
     console.log('Generating image with Amazon Nova Canvas...');
-    const imageBase64 = await generateImageWithNovaCanvas(result, userName || undefined);
+    const imageBase64 = await generateImageWithNovaCanvas({
+      service: {
+        serviceName: result.service.serviceName,
+        category: result.service.category || '',
+      },
+      catchphrase: result.catchphrase,
+    }, userName || undefined);
     
     console.log('Gift card generated successfully');
     return {
@@ -46,30 +130,15 @@ export const handler: Schema['giftCard']['functionHandler'] = async (event) => {
     };
     
   } catch (error) {
-    console.error('Gift card generation error:', error);
+    // エラーをログ出力
+    logError('giftCard.handler.generate', error);
 
-    // エラータイプに応じた処理
-    if (error && typeof error === 'object' && 'name' in error) {
-      const errorName = (error as { name: string }).name;
-
-      if (errorName === 'ThrottlingException') {
-        return {
-          imageData: null,
-          error: 'リクエストが多すぎます。しばらく待ってから再試行してください',
-        };
-      }
-
-      if (errorName === 'ValidationException') {
-        return {
-          imageData: null,
-          error: '入力データが不正です',
-        };
-      }
-    }
+    // ユーザー向けメッセージを取得
+    const userMessage = getBedrockErrorMessage(error);
 
     return {
       imageData: null,
-      error: 'ギフトカード生成中にエラーが発生しました',
+      error: userMessage,
     };
   }
 };
@@ -81,7 +150,7 @@ export const handler: Schema['giftCard']['functionHandler'] = async (event) => {
  * - AWSサービスに相応しいビジュアル画像を生成
  * - 画像には文字情報を含めない（フロントエンドでオーバーレイ）
  */
-async function generateImageWithNovaCanvas(result: any, userName?: string): Promise<string> {
+async function generateImageWithNovaCanvas(result: { service: { serviceName: string; category: string }; catchphrase: string }, _userName?: string): Promise<string> {
   const serviceName = result.service.serviceName;
   const category = result.service.category;
   const catchphrase = result.catchphrase;
@@ -108,20 +177,37 @@ async function generateImageWithNovaCanvas(result: any, userName?: string): Prom
     },
   };
 
-  const command = new InvokeModelCommand({
-    modelId: 'amazon.nova-canvas-v1:0',
-    contentType: 'application/json',
-    accept: 'application/json',
-    body: JSON.stringify(request),
-  });
+  try {
+    const command = new InvokeModelCommand({
+      modelId: 'amazon.nova-canvas-v1:0',
+      contentType: 'application/json',
+      accept: 'application/json',
+      body: JSON.stringify(request),
+    });
 
-  const response = await client.send(command);
-  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-  
-  // Base64エンコードされた画像を取得
-  const base64Image = responseBody.images[0];
-  
-  return base64Image;
+    const response = await client.send(command);
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    
+    // エラーレスポンスのチェック
+    if (responseBody.error) {
+      logError('generateImageWithNovaCanvas', new Error(responseBody.error), { serviceName, category });
+      throw new Error(responseBody.error);
+    }
+    
+    // 画像データの存在チェック
+    if (!responseBody.images || !responseBody.images[0]) {
+      logError('generateImageWithNovaCanvas', new Error('No image in response'), { responseBody });
+      throw new Error('画像が生成されませんでした');
+    }
+    
+    // Base64エンコードされた画像を取得
+    const base64Image = responseBody.images[0];
+    
+    return base64Image;
+  } catch (error) {
+    logError('generateImageWithNovaCanvas.invoke', error, { serviceName, category, prompt });
+    throw error;
+  }
 }
 
 /**
