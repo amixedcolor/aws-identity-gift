@@ -11,7 +11,7 @@ interface GiftCardGeneratorProps {
   /** ユーザー名（オプション） */
   userName?: string;
   /** SNSシェアコールバック */
-  onShare?: (imageData: string) => void;
+  onShare?: () => void;
 }
 
 /**
@@ -366,7 +366,7 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
               {/* シェアボタン */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => onShare?.(giftCardImage!)}
+                  onClick={() => onShare?.()}
                   className="flex-1 px-8 py-4 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-lg font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
                 >
                   <Image
@@ -376,13 +376,13 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
                     height={24}
                     className="w-6 h-6"
                   />
-                  <span>シェアする</span>
+                  <span>Xでシェア</span>
                 </button>
               </div>
 
               {/* シェア時の注意書き */}
               <p className="text-center text-sm text-gray-600">
-                💡 スマートフォンでは画像付きでシェアできます。PCの場合は画像を保存してから投稿時に添付してください。
+                💡 画像を保存してから、シェア時に添付してください
               </p>
             </div>
           </div>
