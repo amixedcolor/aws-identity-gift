@@ -31,11 +31,11 @@ export default function ResultDisplay({ result, onStartNew }: ResultDisplayProps
   };
 
   // SNSシェアハンドラー
-  const handleShare = (imageData: string) => {
+  const handleShare = () => {
     const text = `私のAWS Identity 2025は「${result.service.serviceName}」でした！\n${result.catchphrase}\n\n#AWSIdentityGift2025 #AWS`;
     const url = window.location.origin;
     
-    // Xでシェア
+    // Twitter intent
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank', 'width=600,height=400');
   };

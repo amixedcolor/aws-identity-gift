@@ -11,7 +11,7 @@ interface GiftCardGeneratorProps {
   /** ユーザー名（オプション） */
   userName?: string;
   /** SNSシェアコールバック */
-  onShare?: (imageData: string) => void;
+  onShare?: () => void;
 }
 
 /**
@@ -145,32 +145,32 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
       const serviceName = result.service.serviceName;
       const maxWidth = canvas.width - 80; // 左右40pxのマージン
       
-      // テキストが収まるフォントサイズを計算（10%小さく: 80→72）
-      let serviceNameFontSize = 72;
+      // テキストが収まるフォントサイズを計算（180%に拡大: 72→130）
+      let serviceNameFontSize = 130;
       ctx.font = `bold ${serviceNameFontSize}px sans-serif`;
       
-      while (ctx.measureText(serviceName).width > maxWidth && serviceNameFontSize > 27) {
+      while (ctx.measureText(serviceName).width > maxWidth && serviceNameFontSize > 48) {
         serviceNameFontSize -= 5;
         ctx.font = `bold ${serviceNameFontSize}px sans-serif`;
       }
       
-      ctx.fillText(serviceName, canvas.width / 2, canvas.height / 2 - 40);
+      ctx.fillText(serviceName, canvas.width / 2, canvas.height / 2 - 60);
 
       // キャッチコピー
       ctx.fillStyle = '#fbbf24'; // 金色
       
       const catchphrase = result.catchphrase;
       
-      // テキストが収まるフォントサイズを計算（10%小さく: 60→54）
-      let catchphraseFontSize = 54;
+      // テキストが収まるフォントサイズを計算（180%に拡大: 54→97）
+      let catchphraseFontSize = 97;
       ctx.font = `bold ${catchphraseFontSize}px sans-serif`;
       
-      while (ctx.measureText(catchphrase).width > maxWidth && catchphraseFontSize > 22) {
+      while (ctx.measureText(catchphrase).width > maxWidth && catchphraseFontSize > 40) {
         catchphraseFontSize -= 4;
         ctx.font = `bold ${catchphraseFontSize}px sans-serif`;
       }
       
-      ctx.fillText(catchphrase, canvas.width / 2, canvas.height / 2 + 60);
+      ctx.fillText(catchphrase, canvas.width / 2, canvas.height / 2 + 100);
 
       // フッター
       ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
@@ -353,28 +353,37 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
             </div>
 
             {/* SNSシェアボタン */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => onShare?.(giftCardImage!)}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-lg font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
-              >
-                <Image
-                  src="/logo-x.png"
-                  alt="X"
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <span>Xでシェア</span>
-              </button>
-
+            <div className="flex flex-col gap-4">
+              {/* 画像保存ボタン（優先表示） */}
               <button
                 onClick={handleDownload}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-bold hover:from-green-600 hover:to-green-700 transition-all shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
+                className="w-full px-8 py-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-bold hover:from-green-600 hover:to-green-700 transition-all shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
               >
                 <span className="text-2xl">💾</span>
-                <span>画像を保存</span>
+                <span>画像を保存する</span>
               </button>
+
+              {/* シェアボタン */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => onShare?.()}
+                  className="flex-1 px-8 py-4 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-lg font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
+                >
+                  <Image
+                    src="/logo-x.png"
+                    alt="X"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6"
+                  />
+                  <span>Xでシェア</span>
+                </button>
+              </div>
+
+              {/* シェア時の注意書き */}
+              <p className="text-center text-sm text-gray-600">
+                💡 画像を保存してから、シェア時に添付してください
+              </p>
             </div>
           </div>
         </div>
