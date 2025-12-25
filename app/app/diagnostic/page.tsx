@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import type { DiagnosticMode, QuestionVolume, UserResponse, Question, DiagnosticResult } from '@/lib/types';
 import ModeSelector from './components/ModeSelector';
 import VolumeSelector from './components/VolumeSelector';
@@ -9,6 +10,7 @@ import GiftOpeningAnimation from './components/GiftOpeningAnimation';
 import ResultDisplay from './components/ResultDisplay';
 import SnowfallEffect from '../components/SnowfallEffect';
 import CreditFooter from '../components/CreditFooter';
+import { saveResult } from '@/lib/storage';
 
 // Import question sets
 import { techFitQuestions } from '@/lib/questions/tech-fit';
@@ -96,6 +98,15 @@ export default function DiagnosticPage() {
       // Parse the result
       const diagnosticResult = JSON.parse(data.result);
       setResult(diagnosticResult);
+      
+      // Save result to LocalStorage
+      try {
+        saveResult(diagnosticResult);
+      } catch (storageError) {
+        console.error('Failed to save result to LocalStorage:', storageError);
+        // Don't block the user from seeing the result
+      }
+      
       // Animation will automatically transition to 'open' and then 'result'
       
     } catch (error) {
@@ -150,9 +161,11 @@ export default function DiagnosticPage() {
         {/* Header */}
         <div className="p-6">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <h1 className="text-2xl md:text-3xl font-bold text-white">
-              Your AWS Identity 2025
-            </h1>
+            <Link href="/">
+              <h1 className="text-2xl md:text-3xl font-bold text-white cursor-pointer hover:text-yellow-300 transition-colors">
+                Your AWS Identity 2025
+              </h1>
+            </Link>
             {step !== 'mode-selection' && step !== 'animation' && (
               <button
                 onClick={handleBack}

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import SnowfallEffect from './components/SnowfallEffect';
 import CreditFooter from './components/CreditFooter';
+import GiftArchive from './components/GiftArchive';
 
 export default function Home() {
   return (
@@ -22,7 +23,7 @@ export default function Home() {
           </span>
         </h1>
 
-        {/* Christmas Tree */}
+        {/* Christmas Tree with Gift Archive */}
         <div className="relative mb-12">
           <Image
             src="/christmas_tree.png"
@@ -32,6 +33,8 @@ export default function Home() {
             priority
             className="drop-shadow-2xl"
           />
+          {/* Gift Archive - positioned around the tree */}
+          <GiftArchive />
         </div>
 
         {/* Start Button */}
