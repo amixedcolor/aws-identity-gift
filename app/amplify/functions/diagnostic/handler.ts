@@ -16,6 +16,16 @@ export const handler: Schema['diagnostic']['functionHandler'] = async (event) =>
     };
   }
 
+  // modeの型検証
+  const validModes = ['tech-fit', 'vibe-fit', 'adventure'];
+  if (!validModes.includes(mode)) {
+    console.error('Invalid mode:', mode);
+    return {
+      result: null,
+      error: '診断方針が不正です',
+    };
+  }
+
   try {
     // JSON文字列をパース
     const parsedResponses = JSON.parse(responses);
@@ -37,8 +47,8 @@ export const handler: Schema['diagnostic']['functionHandler'] = async (event) =>
       };
     }
 
-    // プロンプトを構築
-    const prompt = buildDiagnosticPrompt(mode, parsedResponses, parsedServices);
+    // プロンプトを構築（型アサーション）
+    const prompt = buildDiagnosticPrompt(mode as 'tech-fit' | 'vibe-fit' | 'adventure', parsedResponses, parsedServices);
 
     // Bedrock APIを呼び出し
     const command = new InvokeModelCommand({
