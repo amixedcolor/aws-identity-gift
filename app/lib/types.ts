@@ -38,6 +38,8 @@ export interface Question {
   type: QuestionType;
   /** 選択肢（multiple-choiceの場合のみ） */
   options?: string[];
+  /** 複数選択可能かどうか（multiple-choiceの場合のみ有効） */
+  multiple?: boolean;
   /** 必須かどうか */
   required: boolean;
   /** 質問ボリューム */
