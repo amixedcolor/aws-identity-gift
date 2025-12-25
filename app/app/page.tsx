@@ -1,83 +1,57 @@
 'use client';
 
-import { useState } from 'react';
-import { generateClient } from 'aws-amplify/data';
-import type { Schema } from '@/amplify/data/resource';
-
-const client = generateClient<Schema>();
+import Image from 'next/image';
+import Link from 'next/link';
+import SnowfallEffect from './components/SnowfallEffect';
+import CreditFooter from './components/CreditFooter';
 
 export default function Home() {
-  const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!prompt.trim()) return;
-
-    setLoading(true);
-    setError('');
-    setResponse('');
-
-    try {
-      const result = await client.queries.chat({ prompt });
-      
-      if (result.data?.error) {
-        setError(result.data.error);
-      } else if (result.data?.response) {
-        setResponse(result.data.response);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'エラーが発生しました');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-zinc-900 dark:to-zinc-800 p-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-indigo-900 dark:text-white">
-            Claude Chat
-          </h1>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-red-900 via-green-900 to-red-900">
+      {/* Snowfall Effect */}
+      <SnowfallEffect />
+
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-12">
+        {/* Title */}
+        <h1 className="text-4xl md:text-6xl font-bold text-center mb-8 text-white drop-shadow-lg">
+          Your AWS Identity 2025
+          <br />
+          <span className="text-2xl md:text-3xl text-yellow-300">
+            〜あなたに贈る「代名詞」〜
+          </span>
+        </h1>
+
+        {/* Christmas Tree */}
+        <div className="relative mb-12">
+          <Image
+            src="/christmas_tree.png"
+            alt="Christmas Tree"
+            width={400}
+            height={500}
+            priority
+            className="drop-shadow-2xl"
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="mb-6">
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="質問を入力してください..."
-            rows={4}
-            className="w-full px-4 py-3 border-2 border-indigo-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 resize-none"
-            disabled={loading}
-          />
-          <button
-            type="submit"
-            disabled={loading || !prompt.trim()}
-            className="mt-3 w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium"
-          >
-            {loading ? '処理中...' : '送信'}
-          </button>
-        </form>
+        {/* Start Button */}
+        <Link
+          href="/diagnostic"
+          className="px-12 py-4 bg-gradient-to-r from-red-600 to-green-600 hover:from-red-700 hover:to-green-700 text-white text-xl font-bold rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 mb-8"
+        >
+          診断を始める
+        </Link>
 
-        {error && (
-          <div className="p-4 bg-red-100 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-700 rounded-lg mb-6">
-            <p className="text-red-800 dark:text-red-200 font-medium">エラー:</p>
-            <p className="text-red-700 dark:text-red-300 mt-1">{error}</p>
-          </div>
-        )}
-
-        {response && (
-          <div className="p-6 bg-white dark:bg-zinc-900 border-2 border-indigo-200 dark:border-zinc-700 rounded-lg shadow-lg">
-            <p className="text-indigo-900 dark:text-indigo-300 font-medium mb-2">回答:</p>
-            <p className="text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap leading-relaxed">
-              {response}
-            </p>
-          </div>
-        )}
+        {/* Disclaimer */}
+        <div className="max-w-2xl mx-auto mt-8 p-6 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+          <p className="text-sm text-white/90 text-center leading-relaxed">
+            本サービスはユーザー識別情報を収集せず、すべてのデータはブラウザのLocalStorageにのみ保存されます。
+          </p>
+        </div>
       </div>
+
+      {/* Credit Footer */}
+      <CreditFooter />
     </div>
   );
 }
