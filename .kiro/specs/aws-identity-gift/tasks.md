@@ -6,7 +6,7 @@
 
 ## タスク
 
-- [ ] 1. プロジェクト基盤とデータ構造の設定
+- [x] 1. プロジェクト基盤とデータ構造の設定
   - Next.js App Routerの基本構造を確認
   - TypeScript型定義ファイルを作成（DiagnosticMode、Question、DiagnosticResult等）
   - サービスマスタ（services.csv）の読み込みユーティリティを実装

@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
     "amplify:sandbox": "npx ampx sandbox --profile gift",
     "amplify:deploy": "npx ampx pipeline-deploy --branch main --app-id YOUR_APP_ID --profile gift"
   },
@@ -26,7 +29,9 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/ui": "^4.0.16",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.16"
   }
 }
