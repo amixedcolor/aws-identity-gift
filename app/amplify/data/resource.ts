@@ -1,5 +1,6 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { bedrockChat } from '../functions/bedrock-chat/resource';
+import { diagnostic } from '../functions/diagnostic/resource';
 
 const schema = a.schema({
   Todo: a
@@ -22,6 +23,22 @@ const schema = a.schema({
     )
     .authorization((allow) => [allow.publicApiKey()])
     .handler(a.handler.function(bedrockChat)),
+  
+  diagnostic: a
+    .query()
+    .arguments({
+      mode: a.string().required(),
+      responses: a.string().required(), // JSON string of UserResponse[]
+      services: a.string().required(),  // JSON string of AWSService[]
+    })
+    .returns(
+      a.customType({
+        result: a.string(), // JSON string of DiagnosticResult
+        error: a.string(),
+      })
+    )
+    .authorization((allow) => [allow.publicApiKey()])
+    .handler(a.handler.function(diagnostic)),
 });
 
 export type Schema = ClientSchema<typeof schema>;

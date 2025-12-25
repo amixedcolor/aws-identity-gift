@@ -66,19 +66,19 @@
     - データ取り扱いに関する免責表示を追加
     - _要件: 3.1、3.2、3.3、3.4、3.5、2.3、2.4、2.5、14.1_
 
-- [ ] 5. Amplify診断Functionの実装
-  - [ ] 5.1 診断Function（Lambda）を作成
+- [x] 5. Amplify診断Functionの実装
+  - [x] 5.1 診断Function（Lambda）を作成
     - Bedrock APIを呼び出すハンドラーを実装
     - エラーハンドリングを追加
     - _要件: 4.1、4.2、12.1、12.4、12.5_
   
-  - [ ] 5.2 Claudeプロンプトテンプレートを作成
+  - [x] 5.2 Claudeプロンプトテンプレートを作成
     - 診断方針別のプロンプトを定義
     - サービスマスタリストを含める
     - JSON形式での出力を要求
     - _要件: 4.2、4.3、4.4、4.5、4.6_
   
-  - [ ] 5.3 Amplify backend.tsでBedrock権限を設定
+  - [x] 5.3 Amplify backend.tsでBedrock権限を設定
     - IAMポリシーでbedrock:InvokeModelを許可
     - _要件: 4.7_
 
