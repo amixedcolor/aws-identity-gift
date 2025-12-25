@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
-import AuthenticatorWrapper from "./AuthenticatorWrapper";
-
-Amplify.configure(outputs);
+import ConfigureAmplify from "./ConfigureAmplify";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +28,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthenticatorWrapper>{children}</AuthenticatorWrapper>
+        <ConfigureAmplify />
+        {children}
       </body>
     </html>
   );

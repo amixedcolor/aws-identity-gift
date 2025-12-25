@@ -1,0 +1,125 @@
+Category,ServiceName
+分析,Amazon Athena
+分析,Amazon Redshift
+分析,Amazon EMR
+分析,Amazon Kinesis
+分析,AWS Glue
+分析,Amazon OpenSearch Service
+分析,Amazon MSK
+分析,Amazon QuickSight
+アプリケーション統合,Amazon SQS
+アプリケーション統合,Amazon SNS
+アプリケーション統合,AWS Step Functions
+アプリケーション統合,Amazon EventBridge
+アプリケーション統合,AWS AppSync
+アプリケーション統合,Amazon MQ
+ブロックチェーン,Amazon Managed Blockchain
+ブロックチェーン,Amazon Managed Blockchain (AMB) Access
+ブロックチェーン,Amazon Managed Blockchain (AMB) Query
+ビジネスアプリケーション,Amazon Connect
+ビジネスアプリケーション,Amazon Chime
+ビジネスアプリケーション,Amazon Wickr
+ビジネスアプリケーション,Amazon Pinpoint
+クラウド財務管理,AWS Cost Explorer
+クラウド財務管理,AWS Budgets
+クラウド財務管理,AWS Compute Optimizer
+クラウド財務管理,AWS Billing Conductor
+コンピューティング,Amazon EC2
+コンピューティング,AWS Lambda
+コンピューティング,AWS Fargate
+コンピューティング,AWS App Runner
+コンピューティング,AWS Batch
+コンピューティング,Amazon Lightsail
+コンピューティング,AWS Outposts
+Customer Enablement,AWS Support
+Customer Enablement,AWS IQ
+Customer Enablement,AWS Managed Services (AMS)
+コンテナ,Amazon ECS
+コンテナ,Amazon EKS
+コンテナ,Amazon ECR
+コンテナ,AWS App2Container
+データベース,Amazon RDS
+データベース,Amazon Aurora
+データベース,Amazon DynamoDB
+データベース,Amazon ElastiCache
+データベース,Amazon Neptune
+データベース,Amazon Timestream
+データベース,Amazon DocumentDB
+データベース,Amazon Keyspaces
+デベロッパーツール,AWS CodePipeline
+デベロッパーツール,AWS CodeBuild
+デベロッパーツール,AWS CodeDeploy
+デベロッパーツール,AWS Cloud9
+デベロッパーツール,AWS X-Ray
+デベロッパーツール,AWS AppConfig
+デベロッパーツール,AWS CloudShell
+エンドユーザーコンピューティング,Amazon WorkSpaces
+エンドユーザーコンピューティング,Amazon AppStream 2.0
+エンドユーザーコンピューティング,Amazon WorkDocs
+エンドユーザーコンピューティング,Amazon WorkSpaces Web
+フロントエンドウェブおよびモバイル,AWS Amplify
+フロントエンドウェブおよびモバイル,AWS Device Farm
+フロントエンドウェブおよびモバイル,AWS AppSync (Frontend focus)
+ゲームテクノロジー,Amazon GameLift
+ゲームテクノロジー,Open 3D Engine
+ゲームテクノロジー,Amazon GameSparks
+IoT,AWS IoT Core
+IoT,AWS IoT Greengrass
+IoT,AWS IoT Analytics
+IoT,AWS IoT Events
+IoT,AWS IoT SiteWise
+Machine Learning (ML) と人工知能 (AI),Amazon SageMaker
+Machine Learning (ML) と人工知能 (AI),Amazon Bedrock
+Machine Learning (ML) と人工知能 (AI),Amazon Rekognition
+Machine Learning (ML) と人工知能 (AI),Amazon Polly
+Machine Learning (ML) と人工知能 (AI),Amazon Lex
+Machine Learning (ML) と人工知能 (AI),Amazon Comprehend
+Machine Learning (ML) と人工知能 (AI),Amazon Textract
+Machine Learning (ML) と人工知能 (AI),Amazon Kendra
+マネジメントとガバナンス,Amazon CloudWatch
+マネジメントとガバナンス,AWS CloudTrail
+マネジメントとガバナンス,AWS Config
+マネジメントとガバナンス,AWS Systems Manager
+マネジメントとガバナンス,AWS Organizations
+マネジメントとガバナンス,AWS Control Tower
+マネジメントとガバナンス,AWS CloudFormation
+マネジメントとガバナンス,AWS Proton
+メディア,AWS Elemental MediaLive
+メディア,AWS Elemental MediaConvert
+メディア,AWS Elemental MediaPackage
+メディア,Amazon Interactive Video Service (IVS)
+メディア,AWS Elemental Appliances
+移行と転送,AWS Migration Hub
+移行と転送,AWS Database Migration Service (DMS)
+移行と転送,AWS Snowball
+移行と転送,AWS Transfer Family
+移行と転送,AWS DataSync
+ネットワークとコンテンツ配信,Amazon VPC
+ネットワークとコンテンツ配信,Amazon Route 53
+ネットワークとコンテンツ配信,Amazon CloudFront
+ネットワークとコンテンツ配信,Amazon API Gateway
+ネットワークとコンテンツ配信,AWS Direct Connect
+ネットワークとコンテンツ配信,AWS Global Accelerator
+ネットワークとコンテンツ配信,Amazon Verified Access
+量子テクノロジー,Amazon Braket
+量子テクノロジー,Amazon Braket Hybrid Jobs
+量子テクノロジー,Amazon Braket Simulators
+Satellite,AWS Ground Station
+Satellite,AWS Ground Station Data Delivery
+Satellite,AWS Ground Station Wideband
+セキュリティ、アイデンティティ、コンプライアンス,AWS IAM
+セキュリティ、アイデンティティ、コンプライアンス,Amazon Cognito
+セキュリティ、アイデンティティ、コンプライアンス,Amazon GuardDuty
+セキュリティ、アイデンティティ、コンプライアンス,Amazon Inspector
+セキュリティ、アイデンティティ、コンプライアンス,Amazon Macie
+セキュリティ、アイデンティティ、コンプライアンス,AWS WAF
+セキュリティ、アイデンティティ、コンプライアンス,AWS Shield
+セキュリティ、アイデンティティ、コンプライアンス,AWS KMS
+セキュリティ、アイデンティティ、コンプライアンス,AWS Secrets Manager
+セキュリティ、アイデンティティ、コンプライアンス,AWS Artifact
+ストレージ,Amazon S3
+ストレージ,Amazon EBS
+ストレージ,Amazon EFS
+ストレージ,Amazon FSx
+ストレージ,AWS Storage Gateway
+ストレージ,AWS Backup
