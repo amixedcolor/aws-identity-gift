@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { DiagnosticMode, QuestionVolume, UserResponse, Question } from '@/lib/types';
+import type { DiagnosticMode, QuestionVolume, UserResponse, Question, DiagnosticResult } from '@/lib/types';
 import ModeSelector from './components/ModeSelector';
 import VolumeSelector from './components/VolumeSelector';
 import QuestionForm from './components/QuestionForm';
@@ -22,7 +22,7 @@ export default function DiagnosticPage() {
   const [selectedMode, setSelectedMode] = useState<DiagnosticMode | null>(null);
   const [selectedVolume, setSelectedVolume] = useState<QuestionVolume>('quick');
   const [responses, setResponses] = useState<UserResponse[]>([]);
-  const [result, setResult] = useState<any>(null); // Will be DiagnosticResult type
+  const [result, setResult] = useState<DiagnosticResult | null>(null);
 
   // Get questions based on selected mode
   const getQuestions = (): Question[] => {
@@ -60,31 +60,57 @@ export default function DiagnosticPage() {
   };
 
   // Handle form submission
-  const handleSubmit = () => {
-    // Show animation
+  const handleSubmit = async () => {
+    // Show animation (shaking state)
     setStep('animation');
     
-    // TODO: This will be implemented in task 5 (Amplify診断Function)
-    // For now, create a mock result for testing
-    setTimeout(() => {
-      const mockResult = {
-        id: crypto.randomUUID(),
-        timestamp: new Date().toISOString(),
+    try {
+      // Load services from CSV
+      const { loadServices, serializeServices } = await import('@/lib/services');
+      const services = await loadServices();
+      
+      // Call Amplify diagnostic function
+      const { generateClient } = await import('aws-amplify/data');
+      const client = generateClient<import('@/amplify/data/resource').Schema>();
+      
+      const { data, errors } = await client.queries.diagnostic({
         mode: selectedMode!,
-        service: {
-          category: 'コンピューティング',
-          serviceName: 'AWS Lambda'
-        },
-        catchphrase: 'あなたはサーバーレスの魔法使い',
-        aiLetter: 'あなたの回答から、効率的で柔軟な開発スタイルが伝わってきました。AWS Lambdaは、サーバー管理の煩わしさから解放され、コードに集中できる環境を提供します。イベント駆動型のアーキテクチャで、必要な時だけ実行されるため、コスト効率も抜群です。',
-        nextActions: [
-          'AWS Lambda公式ドキュメントを読んで基本概念を理解する',
-          'サーバーレスフレームワーク（Serverless Framework、SAM）を試してみる',
-          '簡単なHTTP APIをLambdaで構築してみる'
-        ]
-      };
-      setResult(mockResult);
-    }, 100);
+        responses: JSON.stringify(responses),
+        services: serializeServices(services)
+      });
+      
+      if (errors || !data) {
+        console.error('Diagnostic query errors:', errors);
+        throw new Error(data?.error || '診断中にエラーが発生しました');
+      }
+      
+      if (data.error) {
+        console.error('Diagnostic error:', data.error);
+        throw new Error(data.error);
+      }
+      
+      if (!data.result) {
+        throw new Error('診断結果が取得できませんでした');
+      }
+      
+      // Parse the result
+      const diagnosticResult = JSON.parse(data.result);
+      setResult(diagnosticResult);
+      // Animation will automatically transition to 'open' and then 'result'
+      
+    } catch (error) {
+      console.error('Failed to get diagnostic result:', error);
+      
+      // Show error to user
+      alert(
+        error instanceof Error 
+          ? error.message 
+          : 'AI分析中にエラーが発生しました。もう一度お試しください'
+      );
+      
+      // Go back to questions
+      setStep('questions');
+    }
   };
 
   // Handle animation complete
@@ -177,7 +203,10 @@ export default function DiagnosticPage() {
             )}
 
             {step === 'animation' && (
-              <GiftOpeningAnimation onComplete={handleAnimationComplete} />
+              <GiftOpeningAnimation 
+                onComplete={handleAnimationComplete}
+                result={result}
+              />
             )}
 
             {step === 'result' && result && (
