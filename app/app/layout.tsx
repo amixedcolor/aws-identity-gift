@@ -13,7 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// 本番環境のベースURL
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://main.d2macyc82ioehn.amplifyapp.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Your AWS Identity 2025 〜あなたに贈る「代名詞」〜",
   description: "あなたの技術的アイデンティティを表すAWSサービスを診断・推薦するクリスマス特別企画",
   openGraph: {

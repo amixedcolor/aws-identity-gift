@@ -353,28 +353,37 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
             </div>
 
             {/* SNSシェアボタン */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => onShare?.(giftCardImage!)}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-lg font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
-              >
-                <Image
-                  src="/logo-x.png"
-                  alt="X"
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                <span>Xでシェア</span>
-              </button>
-
+            <div className="flex flex-col gap-4">
+              {/* 画像保存ボタン（優先表示） */}
               <button
                 onClick={handleDownload}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-bold hover:from-green-600 hover:to-green-700 transition-all shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
+                className="w-full px-8 py-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-bold hover:from-green-600 hover:to-green-700 transition-all shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
               >
                 <span className="text-2xl">💾</span>
-                <span>画像を保存</span>
+                <span>画像を保存する</span>
               </button>
+
+              {/* シェアボタン */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => onShare?.(giftCardImage!)}
+                  className="flex-1 px-8 py-4 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-lg font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg transform hover:scale-105 flex items-center justify-center gap-3"
+                >
+                  <Image
+                    src="/logo-x.png"
+                    alt="X"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6"
+                  />
+                  <span>シェアする</span>
+                </button>
+              </div>
+
+              {/* シェア時の注意書き */}
+              <p className="text-center text-sm text-gray-600">
+                💡 スマートフォンでは画像付きでシェアできます。PCの場合は画像を保存してから投稿時に添付してください。
+              </p>
             </div>
           </div>
         </div>
