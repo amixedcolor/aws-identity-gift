@@ -1,6 +1,7 @@
 'use client';
 
 import type { DiagnosticResult } from '@/lib/types';
+import GiftCardGenerator from './GiftCardGenerator';
 
 interface ResultDisplayProps {
   /** 診断結果 */
@@ -29,8 +30,18 @@ export default function ResultDisplay({ result, onStartNew }: ResultDisplayProps
     });
   };
 
+  // SNSシェアハンドラー
+  const handleShare = (imageData: string) => {
+    const text = `私のAWS Identity 2025は「${result.service.serviceName}」でした！\n${result.catchphrase}\n\n#AWSIdentityGift2025 #AWS`;
+    const url = window.location.origin;
+    
+    // Xでシェア
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+  };
+
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto space-y-8">
       {/* メインカード */}
       <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden">
         {/* ヘッダー部分 - グラデーション背景 */}
@@ -125,6 +136,9 @@ export default function ResultDisplay({ result, onStartNew }: ResultDisplayProps
           この結果はブラウザに保存され、トップページのツリーの周りにギフトとして表示されます
         </p>
       </div>
+
+      {/* ギフトカード生成コンポーネント */}
+      <GiftCardGenerator result={result} onShare={handleShare} />
     </div>
   );
 }

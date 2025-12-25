@@ -1,6 +1,7 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { bedrockChat } from '../functions/bedrock-chat/resource';
 import { diagnostic } from '../functions/diagnostic/resource';
+import { giftCard } from '../functions/gift-card/resource';
 
 const schema = a.schema({
   Todo: a
@@ -39,6 +40,21 @@ const schema = a.schema({
     )
     .authorization((allow) => [allow.publicApiKey()])
     .handler(a.handler.function(diagnostic)),
+  
+  giftCard: a
+    .query()
+    .arguments({
+      resultData: a.string().required(), // JSON string of DiagnosticResult
+      userName: a.string(),              // Optional user name
+    })
+    .returns(
+      a.customType({
+        imageData: a.string(), // Base64 encoded image
+        error: a.string(),
+      })
+    )
+    .authorization((allow) => [allow.publicApiKey()])
+    .handler(a.handler.function(giftCard)),
 });
 
 export type Schema = ClientSchema<typeof schema>;
