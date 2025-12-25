@@ -24,6 +24,7 @@ export const techFitQuestions: Question[] = [
       'C#/.NET',
       'Ruby',
       'PHP',
+      'Bash',
       'その他'
     ],
     required: true,
@@ -89,6 +90,7 @@ export const techFitQuestions: Question[] = [
       'インフラ・SRE',
       'データエンジニア',
       'アーキテクト',
+      'テクニカルサポートエンジニア',
       '個人開発者'
     ],
     required: true,
