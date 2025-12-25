@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import type { DiagnosticResult } from '@/lib/types';
+import { logError, getUserMessage, normalizeError, isOnline, ERROR_MESSAGES } from '@/lib/errors';
 
 interface GiftCardGeneratorProps {
   /** 診断結果 */
@@ -34,6 +35,13 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
 
   useEffect(() => {
     async function generateCard() {
+      // オフラインチェック
+      if (!isOnline()) {
+        setError(ERROR_MESSAGES.NETWORK_OFFLINE);
+        setIsGenerating(false);
+        return;
+      }
+
       try {
         setIsGenerating(true);
         setError(null);
@@ -48,12 +56,13 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
         });
 
         if (errors || !data) {
-          console.error('Gift card generation errors:', errors);
-          throw new Error(data?.error || 'ギフトカード生成中にエラーが発生しました');
+          const errorMsg = errors?.[0]?.message || 'ギフトカード生成中にエラーが発生しました';
+          logError('GiftCardGenerator.generateCard', new Error(errorMsg));
+          throw new Error(data?.error || errorMsg);
         }
 
         if (data.error) {
-          console.error('Gift card error:', data.error);
+          logError('GiftCardGenerator.generateCard', new Error(data.error));
           throw new Error(data.error);
         }
 
@@ -63,12 +72,12 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
 
         setGiftCardImage(data.imageData);
       } catch (err) {
-        console.error('Failed to generate gift card:', err);
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'ギフトカード生成中にエラーが発生しました'
-        );
+        // エラーを正規化してログ出力
+        const normalizedError = normalizeError(err, 'GiftCardGenerator.generateCard');
+        logError('GiftCardGenerator.generateCard', normalizedError);
+        
+        // ユーザー向けメッセージを設定
+        setError(getUserMessage(err));
       } finally {
         setIsGenerating(false);
       }
@@ -85,7 +94,10 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
       // Canvasで画像とテキストを合成
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Canvas context not available');
+      if (!ctx) {
+        logError('GiftCardGenerator.handleDownload', new Error('Canvas context not available'));
+        throw new Error('画像の生成に失敗しました');
+      }
 
       // キャンバスサイズを設定
       canvas.width = 1280;
@@ -97,7 +109,7 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
       
       await new Promise((resolve, reject) => {
         img.onload = resolve;
-        img.onerror = reject;
+        img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
         img.src = `data:image/png;base64,${giftCardImage}`;
       });
 
@@ -178,12 +190,19 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
       link.download = `aws-identity-gift-${result.id}.png`;
       link.click();
     } catch (err) {
-      console.error('Failed to download image:', err);
+      // エラーをログ出力
+      logError('GiftCardGenerator.handleDownload', err);
+      
       // フォールバック: 元の画像をダウンロード
-      const link = document.createElement('a');
-      link.href = `data:image/png;base64,${giftCardImage}`;
-      link.download = `aws-identity-gift-${result.id}.png`;
-      link.click();
+      try {
+        const link = document.createElement('a');
+        link.href = `data:image/png;base64,${giftCardImage}`;
+        link.download = `aws-identity-gift-${result.id}.png`;
+        link.click();
+      } catch (fallbackErr) {
+        logError('GiftCardGenerator.handleDownload.fallback', fallbackErr);
+        alert('画像のダウンロードに失敗しました');
+      }
     }
   };
 
@@ -219,6 +238,14 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
 
   // エラー時
   if (error) {
+    const handleRetry = () => {
+      setError(null);
+      setIsGenerating(true);
+      // useEffectが再実行されるようにresultを変更せずに再試行
+      // 実際には新しいuseEffectトリガーが必要なので、コンポーネントを再マウントする
+      window.location.reload();
+    };
+
     return (
       <div className="w-full max-w-4xl mx-auto mt-8">
         <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-12">
@@ -230,6 +257,12 @@ export default function GiftCardGenerator({ result, userName, onShare }: GiftCar
               </h3>
               <p className="text-gray-600">{error}</p>
             </div>
+            <button
+              onClick={handleRetry}
+              className="px-6 py-3 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold hover:from-red-600 hover:to-orange-600 transition-all"
+            >
+              再試行
+            </button>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import type { DiagnosticMode, QuestionVolume, UserResponse, Question, DiagnosticResult } from '@/lib/types';
 import ModeSelector from './components/ModeSelector';
@@ -10,7 +10,17 @@ import GiftOpeningAnimation from './components/GiftOpeningAnimation';
 import ResultDisplay from './components/ResultDisplay';
 import SnowfallEffect from '../components/SnowfallEffect';
 import CreditFooter from '../components/CreditFooter';
+import ErrorBoundary from '../components/ErrorBoundary';
+import { ErrorToast } from '../components/ErrorDisplay';
 import { saveResult } from '@/lib/storage';
+import { 
+  logError, 
+  getUserMessage, 
+  normalizeError, 
+  isOnline,
+  ERROR_MESSAGES,
+  type AppError 
+} from '@/lib/errors';
 
 // Import question sets
 import { techFitQuestions } from '@/lib/questions/tech-fit';
@@ -25,6 +35,17 @@ export default function DiagnosticPage() {
   const [selectedVolume, setSelectedVolume] = useState<QuestionVolume>('quick');
   const [responses, setResponses] = useState<UserResponse[]>([]);
   const [result, setResult] = useState<DiagnosticResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // エラーを表示する
+  const showError = useCallback((message: string) => {
+    setErrorMessage(message);
+  }, []);
+
+  // エラーをクリアする
+  const clearError = useCallback(() => {
+    setErrorMessage(null);
+  }, []);
 
   // Get questions based on selected mode
   const getQuestions = (): Question[] => {
@@ -63,6 +84,12 @@ export default function DiagnosticPage() {
 
   // Handle form submission
   const handleSubmit = async () => {
+    // オフラインチェック
+    if (!isOnline()) {
+      showError(ERROR_MESSAGES.NETWORK_OFFLINE);
+      return;
+    }
+
     // Show animation (shaking state)
     setStep('animation');
     
@@ -82,12 +109,13 @@ export default function DiagnosticPage() {
       });
       
       if (errors || !data) {
-        console.error('Diagnostic query errors:', errors);
-        throw new Error(data?.error || '診断中にエラーが発生しました');
+        const errorMsg = errors?.[0]?.message || '診断中にエラーが発生しました';
+        logError('DiagnosticPage.handleSubmit', new Error(errorMsg));
+        throw new Error(data?.error || errorMsg);
       }
       
       if (data.error) {
-        console.error('Diagnostic error:', data.error);
+        logError('DiagnosticPage.handleSubmit', new Error(data.error));
         throw new Error(data.error);
       }
       
@@ -103,21 +131,22 @@ export default function DiagnosticPage() {
       try {
         saveResult(diagnosticResult);
       } catch (storageError) {
-        console.error('Failed to save result to LocalStorage:', storageError);
-        // Don't block the user from seeing the result
+        // LocalStorageエラーをログ出力（ユーザーには結果を表示）
+        const normalizedError = normalizeError(storageError, 'DiagnosticPage.saveResult');
+        logError('DiagnosticPage.saveResult', normalizedError);
+        // 結果表示は続行するが、保存失敗を通知
+        showError(getUserMessage(storageError));
       }
       
       // Animation will automatically transition to 'open' and then 'result'
       
     } catch (error) {
-      console.error('Failed to get diagnostic result:', error);
+      // エラーを正規化してログ出力
+      const normalizedError = normalizeError(error, 'DiagnosticPage.handleSubmit');
+      logError('DiagnosticPage.handleSubmit', normalizedError);
       
-      // Show error to user
-      alert(
-        error instanceof Error 
-          ? error.message 
-          : 'AI分析中にエラーが発生しました。もう一度お試しください'
-      );
+      // ユーザー向けメッセージを表示
+      showError(getUserMessage(error));
       
       // Go back to questions
       setStep('questions');
@@ -152,85 +181,97 @@ export default function DiagnosticPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-red-900 via-green-900 to-red-900">
-      {/* Snowfall Effect */}
-      <SnowfallEffect />
+    <ErrorBoundary>
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-red-900 via-green-900 to-red-900">
+        {/* Snowfall Effect */}
+        <SnowfallEffect />
 
-      {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Header */}
-        <div className="p-6">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <Link href="/">
-              <h1 className="text-2xl md:text-3xl font-bold text-white cursor-pointer hover:text-yellow-300 transition-colors">
-                Your AWS Identity 2025
-              </h1>
-            </Link>
-            {step !== 'mode-selection' && step !== 'animation' && (
-              <button
-                onClick={handleBack}
-                className="px-4 py-2 rounded-lg bg-white/10 border border-white/30 text-white hover:bg-white/20 transition-all"
-              >
-                ← 戻る
-              </button>
-            )}
+        {/* Error Toast */}
+        {errorMessage && (
+          <ErrorToast
+            message={errorMessage}
+            type="error"
+            onClose={clearError}
+            autoCloseMs={5000}
+          />
+        )}
+
+        {/* Main Content */}
+        <div className="relative z-10 min-h-screen flex flex-col">
+          {/* Header */}
+          <div className="p-6">
+            <div className="max-w-4xl mx-auto flex items-center justify-between">
+              <Link href="/">
+                <h1 className="text-2xl md:text-3xl font-bold text-white cursor-pointer hover:text-yellow-300 transition-colors">
+                  Your AWS Identity 2025
+                </h1>
+              </Link>
+              {step !== 'mode-selection' && step !== 'animation' && (
+                <button
+                  onClick={handleBack}
+                  className="px-4 py-2 rounded-lg bg-white/10 border border-white/30 text-white hover:bg-white/20 transition-all"
+                >
+                  ← 戻る
+                </button>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Content Area */}
-        <div className="flex-1 flex items-center justify-center p-4 pb-20">
-          <div className="w-full max-w-4xl">
-            {step === 'mode-selection' && (
-              <ModeSelector
-                selectedMode={selectedMode}
-                onSelectMode={handleModeSelect}
-              />
-            )}
-
-            {step === 'volume-selection' && (
-              <div className="space-y-8">
-                <VolumeSelector
-                  selectedVolume={selectedVolume}
-                  onSelectVolume={handleVolumeSelect}
+          {/* Content Area */}
+          <div className="flex-1 flex items-center justify-center p-4 pb-20">
+            <div className="w-full max-w-4xl">
+              {step === 'mode-selection' && (
+                <ModeSelector
+                  selectedMode={selectedMode}
+                  onSelectMode={handleModeSelect}
                 />
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleStartQuestions}
-                    className="px-12 py-4 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 text-red-900 text-xl font-bold hover:from-yellow-500 hover:to-orange-500 transition-all shadow-2xl transform hover:scale-105"
-                  >
-                    診断を開始する
-                  </button>
+              )}
+
+              {step === 'volume-selection' && (
+                <div className="space-y-8">
+                  <VolumeSelector
+                    selectedVolume={selectedVolume}
+                    onSelectVolume={handleVolumeSelect}
+                  />
+                  <div className="flex justify-center">
+                    <button
+                      onClick={handleStartQuestions}
+                      className="px-12 py-4 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 text-red-900 text-xl font-bold hover:from-yellow-500 hover:to-orange-500 transition-all shadow-2xl transform hover:scale-105"
+                    >
+                      診断を開始する
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {step === 'questions' && (
-              <QuestionForm
-                questions={getQuestions()}
-                currentVolume={selectedVolume}
-                responses={responses}
-                onResponseChange={setResponses}
-                onSubmit={handleSubmit}
-                onVolumeSwitch={handleVolumeSwitch}
-              />
-            )}
+              {step === 'questions' && (
+                <QuestionForm
+                  questions={getQuestions()}
+                  currentVolume={selectedVolume}
+                  responses={responses}
+                  onResponseChange={setResponses}
+                  onSubmit={handleSubmit}
+                  onVolumeSwitch={handleVolumeSwitch}
+                />
+              )}
 
-            {step === 'animation' && (
-              <GiftOpeningAnimation 
-                onComplete={handleAnimationComplete}
-                result={result}
-              />
-            )}
+              {step === 'animation' && (
+                <GiftOpeningAnimation 
+                  onComplete={handleAnimationComplete}
+                  result={result}
+                />
+              )}
 
-            {step === 'result' && result && (
-              <ResultDisplay result={result} onStartNew={handleStartNew} />
-            )}
+              {step === 'result' && result && (
+                <ResultDisplay result={result} onStartNew={handleStartNew} />
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Credit Footer */}
-        <CreditFooter />
+          {/* Credit Footer */}
+          <CreditFooter />
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }

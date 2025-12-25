@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "amplify:sandbox": "npx ampx sandbox --profile gift",
-    "amplify:deploy": "npx ampx pipeline-deploy --branch main --app-id YOUR_APP_ID --profile gift"
+    "amplify:deploy": "npx ampx pipeline-deploy --branch main --app-id d2macyc82ioehn --profile gift"
   },
   "dependencies": {
     "@aws-amplify/backend": "^1.18.0",
