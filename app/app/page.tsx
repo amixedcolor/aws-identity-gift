@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import SnowfallEffect from './components/SnowfallEffect';
 import CreditFooter from './components/CreditFooter';
 import GiftArchive from './components/GiftArchive';
@@ -37,18 +36,27 @@ export default function Home() {
           <GiftArchive />
         </div>
 
-        {/* Start Button */}
-        <Link
-          href="/diagnostic"
-          className="px-12 py-4 bg-gradient-to-r from-red-600 to-green-600 hover:from-red-700 hover:to-green-700 text-white text-xl font-bold rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 mb-8"
-        >
-          診断を始める
-        </Link>
+        {/* Service Closed Notice */}
+        <div className="px-12 py-4 bg-gray-600/80 text-white text-xl font-bold rounded-full shadow-2xl mb-4 cursor-not-allowed">
+          サービス終了
+        </div>
 
-        {/* Disclaimer */}
-        <div className="max-w-2xl mx-auto mt-8 p-6 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+        {/* Closed Message */}
+        <div className="max-w-2xl mx-auto mt-4 p-6 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+          <p className="text-lg text-white text-center leading-relaxed mb-4">
+            🎄 ご利用ありがとうございました 🎄
+          </p>
           <p className="text-sm text-white/90 text-center leading-relaxed">
-            本サービスはユーザー識別情報を収集せず、すべてのデータはブラウザのLocalStorageにのみ保存されます。
+            本サービスは終了しました。新規の診断はできませんが、
+            ツリーの周りに表示されているギフトをクリックすると、
+            これまでの診断結果を引き続きご覧いただけます。
+          </p>
+        </div>
+
+        {/* Original Disclaimer */}
+        <div className="max-w-2xl mx-auto mt-4 p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+          <p className="text-xs text-white/70 text-center leading-relaxed">
+            すべてのデータはブラウザのLocalStorageにのみ保存されています。
           </p>
         </div>
       </div>
